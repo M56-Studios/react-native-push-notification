@@ -173,15 +173,10 @@ public class RNPushNotificationHelper {
 
         Log.d(LOG_TAG, String.format("Setting a notification with id %s at time %s",
                 bundle.getString("id"), Long.toString(fireDate)));
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            if (allowWhileIdle && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                getAlarmManager().setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, fireDate, pendingIntent);
-            } else {
-                getAlarmManager().setExact(AlarmManager.RTC_WAKEUP, fireDate, pendingIntent);
-            }
-        } else {
-            getAlarmManager().set(AlarmManager.RTC_WAKEUP, fireDate, pendingIntent);
-        }
+        
+        // fix by @lachtos as seen in https://github.com/zo0r/react-native-push-notification/issues/2256#issuecomment-1740635462
+        // use inexact alarm timing for scheduled notifications (avoids needing SCHEDULE_EXACT_ALARM permission)
+        getAlarmManager().setWindow(AlarmManager.RTC_WAKEUP, fireDate, 10 * 60 * 1000, pendingIntent);
     }
 
 
